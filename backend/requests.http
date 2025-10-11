@@ -1,0 +1,139 @@
+### Health
+GET http://localhost:4000/health
+
+# Example 200 response
+# {
+#   "status": "ok"
+# }
+
+### Register
+POST http://localhost:4000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "dev@example.com",
+  "username": "devuser",
+  "password": "Password123!"
+}
+
+# Example 201 response (cookies set via Set-Cookie headers)
+# Status: 201 Created
+# Set-Cookie: access_token=...; HttpOnly; Path=/; ...
+# Set-Cookie: refresh_token=...; HttpOnly; Path=/api/auth; ...
+# {
+#   "user": {
+#     "id": "67157f2d2a2d3fb8a0b9c111",
+#     "email": "dev@example.com",
+#     "username": "devuser",
+#     "createdAt": "2025-10-11T06:35:00.123Z",
+#     "updatedAt": "2025-10-11T06:35:00.123Z"
+#   }
+# }
+
+# Example 400 response (validation)
+# Status: 400 Bad Request
+# {
+#   "success": false,
+#   "error": {
+#     "type": "ValidationError",
+#     "message": "Validation failed",
+#     "fields": {
+#       "password": "String must contain at least 8 character(s)"
+#     }
+#   }
+# }
+
+# Example 409 response (email taken)
+# Status: 409 Conflict
+# {
+#   "success": false,
+#   "error": { "type": "ConflictError", "message": "Email already in use" }
+# }
+
+### Login
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dev@example.com",
+  "password": "Password123!"
+}
+
+# Example 200 response (cookies set via Set-Cookie headers)
+# Status: 200 OK
+# Set-Cookie: access_token=...; HttpOnly; Path=/; ...
+# Set-Cookie: refresh_token=...; HttpOnly; Path=/api/auth; ...
+# {
+#   "user": {
+#     "id": "67157f2d2a2d3fb8a0b9c111",
+#     "email": "dev@example.com",
+#     "username": "devuser",
+#     "createdAt": "2025-10-11T06:35:00.123Z",
+#     "updatedAt": "2025-10-11T06:35:00.123Z"
+#   }
+# }
+
+# Example 401 response (invalid credentials)
+# Status: 401 Unauthorized
+# {
+#   "success": false,
+#   "error": { "type": "UnauthorizedError", "message": "Invalid credentials" }
+# }
+
+### Me
+GET http://localhost:4000/api/auth/me
+
+# Example 200 response
+# Status: 200 OK
+# {
+#   "user": {
+#     "id": "67157f2d2a2d3fb8a0b9c111",
+#     "email": "dev@example.com",
+#     "username": "devuser",
+#     "createdAt": "2025-10-11T06:35:00.123Z",
+#     "updatedAt": "2025-10-11T06:35:00.123Z"
+#   }
+# }
+
+# Example 401 response (missing/expired access token)
+# Status: 401 Unauthorized
+# {
+#   "success": false,
+#   "error": { "type": "UnauthorizedError", "message": "Unauthorized" }
+# }
+
+### Refresh
+POST http://localhost:4000/api/auth/refresh
+
+# Example 200 response (cookies rotated via Set-Cookie)
+# Status: 200 OK
+# Set-Cookie: access_token=...; HttpOnly; Path=/; ...
+# Set-Cookie: refresh_token=...; HttpOnly; Path=/api/auth; ...
+# {
+#   "ok": true
+# }
+
+# Example 401 response (no/invalid refresh token)
+# Status: 401 Unauthorized
+# {
+#   "success": false,
+#   "error": { "type": "UnauthorizedError", "message": "Missing refresh token" }
+# }
+
+### Logout
+POST http://localhost:4000/api/auth/logout
+
+# Example 200 response
+# Status: 200 OK
+# Set-Cookie: access_token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; ...
+# Set-Cookie: refresh_token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/api/auth; ...
+# {
+#   "ok": true
+# }
+
+# Example 429 response (rate limited on /api/auth)
+# Status: 429 Too Many Requests
+# {
+#   "success": false,
+#   "error": { "type": "TooManyRequestsError", "message": "Too many requests, please try again later." }
+# }
