@@ -137,3 +137,74 @@ POST http://localhost:4000/api/auth/logout
 #   "success": false,
 #   "error": { "type": "TooManyRequestsError", "message": "Too many requests, please try again later." }
 # }
+
+### Problems - Create (requires auth)
+POST http://localhost:4000/api/problems
+Content-Type: application/json
+
+{
+  "title": "Two Sum",
+  "descriptionMd": "# Two Sum\n\nGiven an array...",
+  "difficulty": "easy",
+  "tags": ["array", "hashmap"]
+}
+
+# Example 201 response
+# {
+#   "problem": {
+#     "pid": 1,
+#     "title": "Two Sum",
+#     "descriptionMd": "# Two Sum\n\nGiven an array...",
+#     "difficulty": "easy",
+#     "tags": ["array", "hashmap"],
+#     "createdAt": "2025-10-11T06:45:00.000Z",
+#     "updatedAt": "2025-10-11T06:45:00.000Z"
+#   }
+# }
+
+### Problems - List
+GET http://localhost:4000/api/problems?page=1&limit=20
+
+# Example 200 response
+# {
+#   "items": [
+#     { "pid": 1, "title": "Two Sum", "difficulty": "easy", "tags": ["array"], "descriptionMd": "# Two Sum...", "createdAt": "...", "updatedAt": "..." }
+#   ],
+#   "page": 1,
+#   "limit": 20,
+#   "total": 1
+# }
+
+### Problems - Get by pid
+GET http://localhost:4000/api/problems/1
+
+# Example 200 response
+# {
+#   "problem": { "pid": 1, "title": "Two Sum", "descriptionMd": "# Two Sum...", "difficulty": "easy", "tags": ["array"], "createdAt": "...", "updatedAt": "..." }
+# }
+
+# Example 404 response
+# {
+#   "success": false,
+#   "error": { "type": "NotFoundError", "message": "Problem not found" }
+# }
+
+### Problems - Update (requires auth)
+PATCH http://localhost:4000/api/problems/1
+Content-Type: application/json
+
+{
+  "title": "Two Sum (Updated)",
+  "difficulty": "medium"
+}
+
+# Example 200 response
+# {
+#   "problem": { "pid": 1, "title": "Two Sum (Updated)", "descriptionMd": "# Two Sum...", "difficulty": "medium", "tags": ["array"], "createdAt": "...", "updatedAt": "..." }
+# }
+
+### Problems - Delete (requires auth)
+DELETE http://localhost:4000/api/problems/1
+
+# Example 204 response
+# [empty body]

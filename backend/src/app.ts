@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import { env } from './lib/env';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error';
 import authRouter from './routes/auth.routes';
+import problemRouter from './routes/problem.routes';
 
 const app = express();
 
@@ -42,6 +43,7 @@ const authLimiter = rateLimit({
   },
 });
 app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/problems', problemRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
