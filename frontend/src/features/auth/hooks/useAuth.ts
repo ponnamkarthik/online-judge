@@ -23,6 +23,7 @@ export function useAuth() {
     retry: 0,
     // If we have cached user, don't block UI: return immediately and refresh in background
     staleTime: 60_000,
+    enabled: Boolean(cachedUser),
   });
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export function useAuth() {
 
   return {
     user: data ?? cachedUser ?? null,
-    isLoading: !cachedUser && isLoading,
+    isLoading: !cachedUser ? false : isLoading,
     isError,
   };
 }

@@ -14,6 +14,7 @@ const refreshClient = axios.create({
 });
 
 let isRefreshing = false;
+let refreshFailed = false;
 type Queued = {
   config: InternalAxiosRequestConfig & { _retry?: boolean };
   resolve: (v: unknown) => void;
@@ -32,6 +33,9 @@ api.interceptors.response.use(
     const isRefresh = url.includes("/api/auth/refresh");
 
     if (status === 401 && original && !original._retry && !isRefresh) {
+      if (refreshFailed) {
+        return Promise.reject(error);
+      }
       original._retry = true;
 
       if (!isRefreshing) {
@@ -48,6 +52,7 @@ api.interceptors.response.use(
           // reject all queued
           pendingQueue.forEach(({ reject }) => reject(refreshErr));
           pendingQueue = [];
+          refreshFailed = true;
           isRefreshing = false;
           return Promise.reject(error);
         }
