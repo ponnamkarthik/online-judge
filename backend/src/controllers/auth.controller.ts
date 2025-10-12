@@ -48,7 +48,7 @@ export async function registerHandler(
   req: Request<unknown, unknown, z.infer<typeof registerSchema>>,
   res: Response
 ) {
-  const user = await registerUser(req.body);
+  await registerUser(req.body);
   // Auto-login after registration
   const login = await loginUser({
     email: req.body.email,
@@ -74,7 +74,7 @@ export async function loginHandler(
   return res.json({ user });
 }
 
-export async function meHandler(req: Request, res: Response) {
+export async function meHandler(req: Request & { user?: { id: string } }, res: Response) {
   const userId = req.user?.id;
   if (!userId) throw new UnauthorizedError();
   const user = await getUserById(userId);

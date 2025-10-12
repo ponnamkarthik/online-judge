@@ -208,3 +208,67 @@ DELETE http://localhost:4000/api/problems/1
 
 # Example 204 response
 # [empty body]
+
+### Execute - Test
+POST http://localhost:4000/api/execute/test
+Content-Type: application/json
+
+{
+  "language": "javascript",
+  "code": "console.log(require('fs').readFileSync(0,'utf8'))",
+  "stdin": "hello world\n"
+}
+
+# Example 200 response
+# {
+#   "result": {
+#     "stdout": "hello world\n",
+#     "stderr": "",
+#     "exitCode": 0,
+#     "timedOut": false,
+#     "durationMs": 25
+#   }
+# }
+
+### Execute - Submit
+POST http://localhost:4000/api/execute/submit
+Content-Type: application/json
+
+{
+  "pid": 1,
+  "language": "javascript",
+  "code": "const fs=require('fs');const input=fs.readFileSync(0,'utf8').trim();console.log(input)"
+}
+
+# Example 200 response
+# {
+#   "pid": 1,
+#   "total": 3,
+#   "passed": true,
+#   "results": [
+#     { "case": 1, "input": "1 2\n", "expected": "1 2", "stdout": "1 2\n", "stderr": "", "exitCode": 0, "timedOut": false, "pass": true, "durationMs": 20 },
+#     { "case": 2, ... }
+#   ]
+# }
+
+### Testcases - Bulk create (requires auth)
+POST http://localhost:4000/api/testcases/bulk
+Content-Type: application/json
+
+{
+  "pid": 1,
+  "cases": [
+    { "input": "2 3\n", "expectedOutput": "5" },
+    { "input": "10 -4\n", "expectedOutput": "6" }
+  ]
+}
+
+# Example 201 response
+# {
+#   "pid": 1,
+#   "created": 2,
+#   "cases": [
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 },
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 }
+#   ]
+# }

@@ -9,6 +9,8 @@ import { env } from './lib/env';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error';
 import authRouter from './routes/auth.routes';
 import problemRouter from './routes/problem.routes';
+import executeRouter from './routes/execute.routes';
+import testcaseRouter from './routes/testcase.routes';
 
 const app = express();
 
@@ -44,6 +46,8 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/problems', problemRouter);
+app.use('/api/execute', executeRouter);
+app.use('/api/testcases', testcaseRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
