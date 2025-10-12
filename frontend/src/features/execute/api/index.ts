@@ -16,7 +16,9 @@ export type ExecuteTestResult = {
   };
 };
 
-export async function executeTest(payload: ExecuteTestPayload): Promise<ExecuteTestResult> {
+export async function executeTest(
+  payload: ExecuteTestPayload
+): Promise<ExecuteTestResult> {
   const { data } = await api.post("/api/execute/test", payload);
   return data as ExecuteTestResult;
 }
@@ -44,7 +46,39 @@ export type ExecuteSubmitResult = {
   }>;
 };
 
-export async function executeSubmit(payload: ExecuteSubmitPayload): Promise<ExecuteSubmitResult> {
+export async function executeSubmit(
+  payload: ExecuteSubmitPayload
+): Promise<ExecuteSubmitResult> {
   const { data } = await api.post("/api/execute/submit", payload);
   return data as ExecuteSubmitResult;
+}
+
+export type Submission = {
+  _id: string;
+  user: string;
+  problem: string;
+  pid: number;
+  language: string;
+  total: number;
+  passed: boolean;
+  results: Array<{
+    case: number;
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+    timedOut: boolean;
+    pass: boolean;
+    durationMs: number;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MySubmissionsResult = {
+  submissions: Submission[];
+};
+
+export async function getMySubmissions(): Promise<MySubmissionsResult> {
+  const { data } = await api.get("/api/execute/my");
+  return data as MySubmissionsResult;
 }

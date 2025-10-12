@@ -4,6 +4,7 @@ import { executeCode, type SupportedLanguage } from '../services/execute.service
 import { Problem } from '../models/problem.model';
 import { TestCase } from '../models/testcase.model';
 import { NotFoundError } from '../utils/errors';
+import { Submission } from '../models/submission.model';
 
 export const executeTestSchema = z.object({
   language: z.enum([
@@ -86,10 +87,35 @@ export async function executeSubmitHandler(
   }
 
   const passed = results.every((x) => x.pass) && results.length === tests.length;
-  return res.json({
-    pid,
-    total: tests.length,
-    passed,
-    results,
-  });
+
+  // Persist submission if user is authenticated
+  const userId = (req as any).user?.id;
+  if (userId) {
+    try {
+      await Submission.create({
+        user: userId,
+        problem: problem._id,
+        pid,
+        language,
+        code,
+        total: tests.length,
+        passed,
+        results: results.map(
+          ({ case: c, stdout, stderr, exitCode, timedOut, pass, durationMs }) => ({
+            case: c,
+            stdout,
+            stderr,
+            exitCode,
+            timedOut,
+            pass,
+            durationMs,
+          })
+        ),
+      });
+    } catch {
+      // swallow persist errors; execution response should still return
+    }
+  }
+
+  return res.json({ pid, total: tests.length, passed, results });
 }

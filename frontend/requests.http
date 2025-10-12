@@ -230,7 +230,7 @@ Content-Type: application/json
 #   }
 # }
 
-### Execute - Submit
+### Execute - Submit (requires auth, persists submission)
 POST http://localhost:4000/api/execute/submit
 Content-Type: application/json
 
@@ -248,6 +248,36 @@ Content-Type: application/json
 #   "results": [
 #     { "case": 1, "input": "1 2\n", "expected": "1 2", "stdout": "1 2\n", "stderr": "", "exitCode": 0, "timedOut": false, "pass": true, "durationMs": 20 },
 #     { "case": 2, ... }
+#   ]
+# }
+
+# Example 401 response (missing/expired access token)
+# Status: 401 Unauthorized
+# {
+#   "success": false,
+#   "error": { "type": "UnauthorizedError", "message": "Unauthorized" }
+# }
+
+### Execute - My submissions (requires auth)
+GET http://localhost:4000/api/execute/my
+
+# Example 200 response
+# {
+#   "submissions": [
+#     {
+#       "_id": "6716abcd1234ef5678901234",
+#       "user": "67157f2d2a2d3fb8a0b9c111",
+#       "problem": "6715800aa5b3e8d2d3c9fabc",
+#       "pid": 1,
+#       "language": "javascript",
+#       "total": 3,
+#       "passed": true,
+#       "results": [
+#         { "case": 1, "stdout": "1 2\n", "stderr": "", "exitCode": 0, "timedOut": false, "pass": true, "durationMs": 20 }
+#       ],
+#       "createdAt": "2025-10-12T07:20:00.000Z",
+#       "updatedAt": "2025-10-12T07:20:00.000Z"
+#     }
 #   ]
 # }
 

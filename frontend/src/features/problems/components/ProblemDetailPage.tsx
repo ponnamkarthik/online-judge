@@ -8,7 +8,11 @@ import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
-import { useExecuteSubmit, useExecuteTest } from "@/features/execute/hooks/useExecute";
+import {
+  useExecuteSubmit,
+  useExecuteTest,
+  useMySubmissions,
+} from "@/features/execute/hooks/useExecute";
 
 const LANGUAGE_OPTIONS = [
   { value: "cpp", label: "C++" },
@@ -85,9 +89,16 @@ export function ProblemDetailPage() {
   const [lang, setLang] = useState<Lang>("node");
   const [code, setCode] = useState<string>(DEFAULT_SNIPPETS["node"]);
   const [stdin, setStdin] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"test" | "submit">("test");
+  const [activeTab, setActiveTab] = useState<"test" | "submit" | "history">(
+    "test"
+  );
   const [results, setResults] = useState<{
-    test?: { stdout: string; stderr: string; exitCode: number; durationMs: number } | null;
+    test?: {
+      stdout: string;
+      stderr: string;
+      exitCode: number;
+      durationMs: number;
+    } | null;
     submit?: {
       total: number;
       passed: boolean;
@@ -107,7 +118,9 @@ export function ProblemDetailPage() {
 
   const extensions = useLanguageExtensions(lang);
   const { mutateAsync: runTest, isPending: isTesting } = useExecuteTest();
-  const { mutateAsync: runSubmit, isPending: isSubmitting } = useExecuteSubmit();
+  const { mutateAsync: runSubmit, isPending: isSubmitting } =
+    useExecuteSubmit();
+  const { data: mySubs } = useMySubmissions();
 
   const onChangeLang = (next: Lang) => {
     setLang(next);
@@ -162,7 +175,11 @@ export function ProblemDetailPage() {
                   setActiveTab("test");
                   const mapped = lang === "node" ? "javascript" : lang;
                   try {
-                    const res = await runTest({ language: mapped, code, stdin });
+                    const res = await runTest({
+                      language: mapped,
+                      code,
+                      stdin,
+                    });
                     setResults((prev) => ({
                       ...prev,
                       test: {
@@ -194,7 +211,11 @@ export function ProblemDetailPage() {
                   setActiveTab("submit");
                   const mapped = lang === "node" ? "javascript" : lang;
                   try {
-                    const res = await runSubmit({ pid, language: mapped, code });
+                    const res = await runSubmit({
+                      pid,
+                      language: mapped,
+                      code,
+                    });
                     setResults((prev) => ({
                       ...prev,
                       submit: {
@@ -240,7 +261,9 @@ export function ProblemDetailPage() {
             />
           </div>
           <div className="border-t p-3">
-            <label className="block text-sm text-muted-foreground mb-1">Stdin (for test)</label>
+            <label className="block text-sm text-muted-foreground mb-1">
+              Stdin (for test)
+            </label>
             <textarea
               className="w-full h-24 bg-background border rounded p-2 font-mono text-sm"
               placeholder="Provide custom input when running test"
@@ -254,16 +277,28 @@ export function ProblemDetailPage() {
         <div className="flex flex-col min-h-[40dvh]">
           <div className="p-3 border-b font-medium flex items-center gap-4">
             <button
-              className={`text-sm ${activeTab === "test" ? "underline" : "text-muted-foreground"}`}
+              className={`text-sm ${
+                activeTab === "test" ? "underline" : "text-muted-foreground"
+              }`}
               onClick={() => setActiveTab("test")}
             >
               Test
             </button>
             <button
-              className={`text-sm ${activeTab === "submit" ? "underline" : "text-muted-foreground"}`}
+              className={`text-sm ${
+                activeTab === "submit" ? "underline" : "text-muted-foreground"
+              }`}
               onClick={() => setActiveTab("submit")}
             >
               Submit
+            </button>
+            <button
+              className={`text-sm ${
+                activeTab === "history" ? "underline" : "text-muted-foreground"
+              }`}
+              onClick={() => setActiveTab("history")}
+            >
+              History
             </button>
           </div>
 
@@ -272,17 +307,23 @@ export function ProblemDetailPage() {
             {activeTab === "test" ? (
               results.test ? (
                 <div className="p-3 space-y-3">
-                  <div className="text-sm">Exit: {results.test.exitCode} • {results.test.durationMs}ms</div>
+                  <div className="text-sm">
+                    Exit: {results.test.exitCode} • {results.test.durationMs}ms
+                  </div>
                   {results.test.stdout && (
                     <div>
                       <div className="text-sm font-medium mb-1">Stdout</div>
-                      <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap text-sm">{results.test.stdout}</pre>
+                      <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap text-sm">
+                        {results.test.stdout}
+                      </pre>
                     </div>
                   )}
                   {results.test.stderr && (
                     <div>
                       <div className="text-sm font-medium mb-1">Stderr</div>
-                      <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap text-sm text-red-500">{results.test.stderr}</pre>
+                      <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap text-sm text-red-500">
+                        {results.test.stderr}
+                      </pre>
                     </div>
                   )}
                 </div>
@@ -291,39 +332,136 @@ export function ProblemDetailPage() {
                   Run a test to see output here.
                 </div>
               )
-            ) : results.submit ? (
-              <div className="p-3 space-y-4">
-                <div className="text-sm">Overall: {results.submit.passed ? "Passed" : "Failed"} • {results.submit.total} cases</div>
-                <div className="space-y-3">
-                  {results.submit.cases.map((c) => (
-                    <div key={c.case} className="border rounded">
-                      <div className="px-3 py-2 border-b text-sm font-medium flex items-center justify-between">
-                        <div>Case {c.case}</div>
-                        <div className={`text-xs px-2 py-0.5 rounded ${c.pass ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}`}>
-                          {c.pass ? "Pass" : "Fail"}
+            ) : activeTab === "submit" ? (
+              results.submit ? (
+                <div className="p-3 space-y-4">
+                  <div className="text-sm">
+                    Overall: {results.submit.passed ? "Passed" : "Failed"} •{" "}
+                    {results.submit.total} cases
+                  </div>
+                  <div className="space-y-3">
+                    {results.submit.cases.map((c) => (
+                      <div key={c.case} className="border rounded">
+                        <div className="px-3 py-2 border-b text-sm font-medium flex items-center justify-between">
+                          <div>Case {c.case}</div>
+                          <div
+                            className={`text-xs px-2 py-0.5 rounded ${
+                              c.pass
+                                ? "bg-green-500/20 text-green-600"
+                                : "bg-red-500/20 text-red-600"
+                            }`}
+                          >
+                            {c.pass ? "Pass" : "Fail"}
+                          </div>
+                        </div>
+                        <div className="p-3 grid grid-cols-1 gap-3 text-sm">
+                          <div>
+                            <div className="text-muted-foreground mb-1">
+                              Input
+                            </div>
+                            <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">
+                              {c.input}
+                            </pre>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground mb-1">
+                              Expected
+                            </div>
+                            <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">
+                              {c.expected}
+                            </pre>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground mb-1">
+                              Output
+                            </div>
+                            <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">
+                              {c.stdout}
+                            </pre>
+                          </div>
                         </div>
                       </div>
-                      <div className="p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                        <div>
-                          <div className="text-muted-foreground mb-1">Input</div>
-                          <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">{c.input}</pre>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center justify-center text-muted-foreground h-full">
+                  Submit the code to see test results here.
+                </div>
+              )
+            ) : (
+              <div className="p-3 space-y-3">
+                {(mySubs?.submissions || [])
+                  .filter((s) => s.pid === pid)
+                  .map((s) => (
+                    <div key={s._id} className="border rounded">
+                      <div className="px-3 py-2 border-b text-sm flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {new Date(s.createdAt).toLocaleString()}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-muted">
+                            {s.language}
+                          </span>
                         </div>
-                        <div>
-                          <div className="text-muted-foreground mb-1">Expected</div>
-                          <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">{c.expected}</pre>
+                        <div
+                          className={`text-xs px-2 py-0.5 rounded ${
+                            s.passed
+                              ? "bg-green-500/20 text-green-600"
+                              : "bg-red-500/20 text-red-600"
+                          }`}
+                        >
+                          {s.passed ? "Passed" : "Failed"}
                         </div>
-                        <div>
-                          <div className="text-muted-foreground mb-1">Output</div>
-                          <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">{c.stdout}</pre>
-                        </div>
+                      </div>
+                      <div className="p-3 space-y-2">
+                        {s.results.map((r) => (
+                          <div
+                            key={r.case}
+                            className="grid grid-cols-1 gap-3 text-sm"
+                          >
+                            <div>
+                              <div className="text-muted-foreground mb-1">
+                                Case {r.case} • {r.durationMs}ms
+                              </div>
+                              <div
+                                className={`text-xs px-1.5 py-0.5 rounded inline-block ${
+                                  r.pass
+                                    ? "bg-green-500/20 text-green-600"
+                                    : "bg-red-500/20 text-red-600"
+                                }`}
+                              >
+                                {r.pass ? "Pass" : "Fail"}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground mb-1">
+                                Stdout
+                              </div>
+                              <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap">
+                                {r.stdout}
+                              </pre>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground mb-1">
+                                Stderr
+                              </div>
+                              <pre className="bg-muted/30 p-2 rounded whitespace-pre-wrap text-red-500">
+                                {r.stderr}
+                              </pre>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center justify-center text-muted-foreground h-full">
-                Submit the code to see test results here.
+                {mySubs &&
+                  mySubs.submissions.filter((s) => s.pid === pid).length ===
+                    0 && (
+                    <div className="text-muted-foreground">
+                      No submissions yet for this problem.
+                    </div>
+                  )}
               </div>
             )}
           </div>

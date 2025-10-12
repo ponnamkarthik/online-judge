@@ -41,7 +41,7 @@ export function ProblemsListPage() {
                   {p.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="bg-secondary px-2 py-1 rounded-md text-xs text-white"
+                      className="bg-foreground/5 px-2 py-1 rounded-md text-xs text-primary"
                     >
                       {tag}
                     </span>
