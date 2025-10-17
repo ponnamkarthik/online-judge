@@ -24,21 +24,26 @@ export const loginSchema = z.object({
 function setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
   const secure = env.isProd;
   const sameSite: 'lax' | 'strict' | 'none' = env.isProd ? 'none' : 'lax';
-  const domain = env.COOKIE_DOMAIN;
+
+  // Only set domain for production; omit for localhost to allow it to work across ports
+  const cookieOptions: any = {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: '/',
+  };
+
+  // Only set domain if COOKIE_DOMAIN is specified (production)
+  if (env.COOKIE_DOMAIN) {
+    cookieOptions.domain = env.COOKIE_DOMAIN;
+  }
 
   res.cookie('access_token', accessToken, {
-    httpOnly: true,
-    secure,
-    sameSite,
-    domain,
+    ...cookieOptions,
     maxAge: 15 * 60 * 1000,
-    path: '/',
   });
   res.cookie('refresh_token', refreshToken, {
-    httpOnly: true,
-    secure,
-    sameSite,
-    domain,
+    ...cookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/api/auth',
   });
@@ -99,13 +104,15 @@ export async function logoutHandler(req: Request, res: Response) {
   await logout(refreshToken ?? '');
   const secure = env.isProd;
   const sameSite: 'lax' | 'strict' | 'none' = env.isProd ? 'none' : 'lax';
-  const domain = env.COOKIE_DOMAIN;
-  res.clearCookie('access_token', { httpOnly: true, secure, sameSite, domain, path: '/' });
+
+  const clearOptions: any = { httpOnly: true, secure, sameSite, path: '/' };
+  if (env.COOKIE_DOMAIN) {
+    clearOptions.domain = env.COOKIE_DOMAIN;
+  }
+
+  res.clearCookie('access_token', clearOptions);
   res.clearCookie('refresh_token', {
-    httpOnly: true,
-    secure,
-    sameSite,
-    domain,
+    ...clearOptions,
     path: '/api/auth',
   });
   return res.json({ ok: true });

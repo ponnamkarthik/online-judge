@@ -22,12 +22,17 @@ app.use(morgan(env.isDev ? 'dev' : 'combined'));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+console.log(env.CORS_ORIGINS);
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    // origin: ['https://codearena.karthikponnam.dev', 'http://localhost:3000'],
+    origin: env.CORS_ORIGINS.length > 0 ? env.CORS_ORIGINS : true,
     credentials: true,
   })
 );
+
+// Handle preflight for all routes
+app.options('*', cors());
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 

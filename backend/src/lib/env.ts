@@ -20,8 +20,16 @@ if (!parsed.success) {
   throw new Error('Invalid environment');
 }
 
+// Parse CORS_ORIGIN as comma-separated list
+const corsOrigins = parsed.data.CORS_ORIGIN
+  ? parsed.data.CORS_ORIGIN.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : [];
+
 export const env = {
   ...parsed.data,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
+  CORS_ORIGINS: corsOrigins, // array of allowed origins
 };

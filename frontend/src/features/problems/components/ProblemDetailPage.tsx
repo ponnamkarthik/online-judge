@@ -144,7 +144,11 @@ export function ProblemDetailPage() {
     const fromLocal = localStorage.getItem(lsKey);
     const codesByLanguage = (data?.problem as ProblemWithCodes | undefined)
       ?.codesByLanguage;
+    console.log("codesByLanguage:", codesByLanguage, apiKey);
     const fromServer = codesByLanguage?.[apiKey];
+    console.log("fromLocal:", fromLocal);
+    console.log("fromServer:", fromServer);
+    console.log("DEFAULT:", DEFAULT_SNIPPETS[next]);
     setCode(fromLocal ?? fromServer ?? DEFAULT_SNIPPETS[next]);
     // Persist selected language for this problem
     try {
