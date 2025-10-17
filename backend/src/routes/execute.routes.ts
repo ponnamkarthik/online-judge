@@ -9,6 +9,8 @@ import {
   executeSubmitHandler,
   executeTestSchema,
   executeSubmitSchema,
+  getMyLastCodeHandler,
+  getMyLastCodeSchema,
 } from '../controllers/execute.controller';
 
 const router = Router();
@@ -19,6 +21,13 @@ router.post(
   requireAuth,
   validate(executeSubmitSchema),
   asyncHandler(executeSubmitHandler)
+);
+
+router.get(
+  '/my/last',
+  requireAuth,
+  validate(getMyLastCodeSchema, 'query'),
+  asyncHandler(getMyLastCodeHandler)
 );
 
 // List current user's submissions (basic pagination optional via query params in future)

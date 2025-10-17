@@ -11,11 +11,11 @@ const schema = z.object({
   REFRESH_TOKEN_TTL: z.string().default('7d'),
   COOKIE_DOMAIN: z.string().optional(),
   CORS_ORIGIN: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
 if (!parsed.success) {
-  // eslint-disable-next-line no-console
   console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
   throw new Error('Invalid environment');
 }

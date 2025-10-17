@@ -13,6 +13,7 @@ export function notFoundMiddleware(_req: Request, res: Response) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorMiddleware(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   // Zod validation errors
   if (err instanceof ZodError) {

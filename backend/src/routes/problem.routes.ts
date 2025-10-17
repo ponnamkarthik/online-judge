@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { validate } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, maybeAuth } from '../middleware/auth';
 import {
   createProblemHandler,
   deleteProblemHandler,
@@ -17,7 +17,7 @@ const router = Router();
 
 // Public list and read
 router.get('/', asyncHandler(listProblemsHandler));
-router.get('/:pid(\\d+)', asyncHandler(getProblemHandler));
+router.get('/:pid(\\d+)', maybeAuth, asyncHandler(getProblemHandler));
 
 // Protected create/update/delete (adjust auth as needed)
 router.post('/', requireAuth, validate(createProblemSchema), asyncHandler(createProblemHandler));

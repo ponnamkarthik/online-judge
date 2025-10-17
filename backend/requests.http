@@ -180,7 +180,16 @@ GET http://localhost:4000/api/problems/1
 
 # Example 200 response
 # {
-#   "problem": { "pid": 1, "title": "Two Sum", "descriptionMd": "# Two Sum...", "difficulty": "easy", "tags": ["array"], "createdAt": "...", "updatedAt": "..." }
+#   "problem": {
+#     "pid": 1,
+#     "title": "Two Sum",
+#     "descriptionMd": "# Two Sum...",
+#     "difficulty": "easy",
+#     "tags": ["array"],
+#     "createdAt": "...",
+#     "updatedAt": "...",
+#     "codesByLanguage": { "javascript": "const fs=require('fs');..." }  // present only if logged-in and has submissions
+#   }
 # }
 
 # Example 404 response
@@ -258,6 +267,16 @@ Content-Type: application/json
 #   "error": { "type": "UnauthorizedError", "message": "Unauthorized" }
 # }
 
+### Execute - Get my last code (requires auth)
+GET http://localhost:4000/api/execute/my/last?pid=1&language=javascript
+
+# Example 200 response
+# {
+#   "code": "const fs=require('fs');...",
+#   "language": "javascript",
+#   "pid": 1
+# }
+
 ### Execute - My submissions (requires auth)
 GET http://localhost:4000/api/execute/my
 
@@ -301,4 +320,19 @@ Content-Type: application/json
 #     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 },
 #     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 }
 #   ]
+# }
+
+### AI - Review code (requires auth)
+POST http://localhost:4000/api/ai/review
+Content-Type: application/json
+
+{
+  "language": "javascript",
+  "code": "function twoSum(a,b){return a+b}",
+  "prompt": "This is intended for large inputs, suggest improvements if any."
+}
+
+# Example 200 response
+# {
+#   "advice": "- Summary: ...\n- Correctness: ...\n- Complexity: ...\n- Improvements: ..."
 # }

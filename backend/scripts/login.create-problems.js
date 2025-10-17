@@ -2,7 +2,7 @@
 const BASE_URL = 'http://localhost:4000';
 
 const credentials = {
-  email: 'demo@gmail.com',
+  email: 'ponnamkarthik3@gmail.com',
   password: 'Demo123@',
 };
 

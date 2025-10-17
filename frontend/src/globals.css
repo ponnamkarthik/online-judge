@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -171,5 +172,22 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Typography (prose) tweaks to match theme tokens */
+@layer components {
+  .prose {
+    @apply prose-neutral max-w-none;
+  }
+  :is(.dark .prose) {
+    @apply prose-invert;
+  }
+  .prose pre, .prose code {
+    @apply font-mono;
+  }
+  /* change background for dark code to some gray */
+  .dark :is(.prose pre, .prose code) {
+    background-color: #2d2d2d !important;
   }
 }

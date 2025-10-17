@@ -5,11 +5,13 @@ import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+
 import { env } from './lib/env';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error';
 import authRouter from './routes/auth.routes';
 import problemRouter from './routes/problem.routes';
 import executeRouter from './routes/execute.routes';
+import aiRouter from './routes/ai.routes';
 import testcaseRouter from './routes/testcase.routes';
 
 const app = express();
@@ -48,6 +50,7 @@ app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/problems', problemRouter);
 app.use('/api/execute', executeRouter);
 app.use('/api/testcases', testcaseRouter);
+app.use('/api/ai', aiRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

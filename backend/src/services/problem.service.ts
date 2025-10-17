@@ -1,4 +1,7 @@
+import mongoose from 'mongoose';
+
 import { Problem } from '../models/problem.model';
+import { Submission } from '../models/submission.model';
 import { NotFoundError } from '../utils/errors';
 
 export async function createProblem(input: {
@@ -16,10 +19,40 @@ export async function createProblem(input: {
   return toDto(doc);
 }
 
-export async function getProblemByPid(pid: number) {
+export async function getProblemByPid(pid: number, userId?: string) {
   const doc = await Problem.findOne({ pid });
   if (!doc) throw new NotFoundError('Problem not found');
-  return toDto(doc);
+
+  const base = toDto(doc);
+
+  if (!userId) return base;
+
+  // fetch latest submission per language for this problem and user (up to 5 langs)
+  const langs: Array<'javascript' | 'typescript' | 'python' | 'cpp' | 'java'> = [
+    'javascript',
+    'typescript',
+    'python',
+    'cpp',
+    'java',
+  ];
+  const subs = await Submission.aggregate([
+    { $match: { pid, user: new mongoose.Types.ObjectId(userId) } },
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: '$language',
+        code: { $first: '$code' },
+        language: { $first: '$language' },
+      },
+    },
+  ]);
+
+  const codesByLanguage: Record<string, string> = {};
+  for (const s of subs) {
+    if (langs.includes(s.language)) codesByLanguage[s.language] = s.code;
+  }
+
+  return { ...base, codesByLanguage };
 }
 
 export async function listProblems(params: { page?: number; limit?: number; tag?: string }) {

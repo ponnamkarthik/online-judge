@@ -8,25 +8,14 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
-      MONGODB_URI: mongodb://mongo:27017/codearena
+      MONGODB_URI: ${MONGODB_URI}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
       REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-7d}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN}
       CORS_ORIGIN: ${CORS_ORIGIN}
-    depends_on:
-      - mongo
     volumes:
       - .:/app
       - /app/node_modules
     command: ["npm", "run", "dev"]
-  mongo:
-    image: mongo:7
-    container_name: codearena-mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-volumes:
-  mongo_data:

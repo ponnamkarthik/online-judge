@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
+
 import {
   createProblem,
   deleteProblem,
@@ -27,7 +28,8 @@ export async function createProblemHandler(
 
 export async function getProblemHandler(req: Request, res: Response) {
   const pid = Number(req.params.pid);
-  const problem = await getProblemByPid(pid);
+  const userId = (req as any).user?.id as string | undefined;
+  const problem = await getProblemByPid(pid, userId);
   return res.json({ problem });
 }
 
