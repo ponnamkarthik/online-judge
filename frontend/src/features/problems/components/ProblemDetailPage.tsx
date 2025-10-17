@@ -131,6 +131,7 @@ export function ProblemDetailPage() {
   const { mutateAsync: reviewCode, isPending: isReviewing } = useAiReview();
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);
   const initializedFromSources = useRef(false);
+  const isInitializing = useRef(true);
 
   // Map between internal Lang and API naming used in codesByLanguage
   const langToApi = (l: Lang): ApiLang => l;
@@ -223,10 +224,18 @@ export function ProblemDetailPage() {
     const initialCode =
       fromLocal ?? fromServer ?? DEFAULT_SNIPPETS[initialLang];
     setCode(initialCode);
+
+    // Mark initialization complete after a frame to allow state to settle
+    requestAnimationFrame(() => {
+      isInitializing.current = false;
+    });
   }, [data?.problem, pid]);
 
-  // Persist code changes debounced per pid+language
+  // Persist code changes debounced per pid+language (skip during initialization)
   useEffect(() => {
+    // Don't autosave during initial load to avoid overwriting server/localStorage code
+    if (isInitializing.current) return;
+
     const apiKey = langToApi(lang);
     const key = `code:problem:${pid}:${apiKey}`;
     const t = setTimeout(() => {
