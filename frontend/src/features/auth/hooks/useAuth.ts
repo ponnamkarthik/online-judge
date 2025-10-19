@@ -75,7 +75,16 @@ export function useLogout() {
     mutationFn: logoutApi,
     onSuccess: () => {
       setUser(null);
-      qc.removeQueries({ queryKey: AUTH_KEYS.me });
+
+      // Clear all React Query cache
+      qc.clear();
+
+      // Clear all localStorage except theme
+      const themeValue = localStorage.getItem("theme");
+      localStorage.clear();
+      if (themeValue) {
+        localStorage.setItem("theme", themeValue);
+      }
     },
   });
 }
