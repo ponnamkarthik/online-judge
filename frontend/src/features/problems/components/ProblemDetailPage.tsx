@@ -435,6 +435,13 @@ export function ProblemDetailPage() {
                             const res = await reviewCode({
                               language: mapped,
                               code,
+                              prompt: `Problem: ${problem.title}\n\n${
+                                problem.descriptionMd
+                              }\n\nDifficulty: ${
+                                problem.difficulty
+                              }\nTags: ${problem.tags.join(
+                                ", "
+                              )}\n\nReview the code for correctness, edge cases, time/space complexity, and suggest improvements if any.`,
                             });
                             setAiAdvice(res.advice);
                           } catch {
