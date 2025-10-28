@@ -25,6 +25,7 @@ Content-Type: application/json
 #     "id": "67157f2d2a2d3fb8a0b9c111",
 #     "email": "dev@example.com",
 #     "username": "devuser",
+#     "role": "user",
 #     "createdAt": "2025-10-11T06:35:00.123Z",
 #     "updatedAt": "2025-10-11T06:35:00.123Z"
 #   }
@@ -68,6 +69,7 @@ Content-Type: application/json
 #     "id": "67157f2d2a2d3fb8a0b9c111",
 #     "email": "dev@example.com",
 #     "username": "devuser",
+#     "role": "user",
 #     "createdAt": "2025-10-11T06:35:00.123Z",
 #     "updatedAt": "2025-10-11T06:35:00.123Z"
 #   }
@@ -90,6 +92,7 @@ GET http://localhost:4000/api/auth/me
 #     "id": "67157f2d2a2d3fb8a0b9c111",
 #     "email": "dev@example.com",
 #     "username": "devuser",
+#     "role": "user",
 #     "createdAt": "2025-10-11T06:35:00.123Z",
 #     "updatedAt": "2025-10-11T06:35:00.123Z"
 #   }
@@ -268,7 +271,7 @@ Content-Type: application/json
 # }
 
 ### Execute - Get my last code (requires auth)
-GET http://localhost:4000/api/execute/my/last?pid=1&language=javascript
+GET http://localhost:4000/api/submissions/my/last?pid=1&language=javascript
 
 # Example 200 response
 # {
@@ -278,7 +281,7 @@ GET http://localhost:4000/api/execute/my/last?pid=1&language=javascript
 # }
 
 ### Execute - My submissions (requires auth)
-GET http://localhost:4000/api/execute/my
+GET http://localhost:4000/api/submissions/my
 
 # Example 200 response
 # {
@@ -317,10 +320,47 @@ Content-Type: application/json
 #   "pid": 1,
 #   "created": 2,
 #   "cases": [
-#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 },
-#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000 }
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000, "input": "2 3\n", "expectedOutput": "5" },
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000, "input": "10 -4\n", "expectedOutput": "6" }
 #   ]
 # }
+
+### Testcases - Get for problem (requires auth)
+GET http://localhost:4000/api/testcases/1
+
+# Example 200 response
+# {
+#   "cases": [
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000, "input": "2 3\n", "expectedOutput": "5" },
+#     { "id": "67159b...", "isSample": false, "timeLimitMs": 2000, "input": "10 -4\n", "expectedOutput": "6" }
+#   ]
+# }
+
+### Testcases - Update (requires auth)
+PATCH http://localhost:4000/api/testcases/67159b...
+Content-Type: application/json
+
+{
+  "input": "5 10\n",
+  "expectedOutput": "15"
+}
+
+# Example 200 response
+# {
+#   "testCase": {
+#     "id": "67159b...",
+#     "isSample": false,
+#     "timeLimitMs": 2000,
+#     "input": "5 10\n",
+#     "expectedOutput": "15"
+#   }
+# }
+
+### Testcases - Delete (requires auth)
+DELETE http://localhost:4000/api/testcases/67159b...
+
+# Example 204 response
+# [empty body]
 
 ### AI - Review code (requires auth)
 POST http://localhost:4000/api/ai/review
@@ -335,4 +375,79 @@ Content-Type: application/json
 # Example 200 response
 # {
 #   "advice": "- Summary: ...\n- Correctness: ...\n- Complexity: ...\n- Improvements: ..."
+# }
+
+### Analytics - Global stats (public)
+GET http://localhost:4000/api/analytics/global
+
+# Example 200 response
+# {
+#   "overview": {
+#     "totalUsers": 150,
+#     "totalProblems": 25,
+#     "totalSubmissions": 3420,
+#     "globalSuccessRate": "67.45%"
+#   },
+#   "problemsByDifficulty": [
+#     { "difficulty": "easy", "count": 10 },
+#     { "difficulty": "medium", "count": 12 },
+#     { "difficulty": "hard", "count": 3 }
+#   ],
+#   "languageDistribution": [
+#     { "language": "javascript", "count": 1250 },
+#     { "language": "python", "count": 980 },
+#     { "language": "cpp", "count": 750 }
+#   ],
+#   "recentActivity": [
+#     { "date": "2025-10-17", "submissions": 145, "passed": 98 },
+#     { "date": "2025-10-18", "submissions": 162, "passed": 110 }
+#   ]
+# }
+
+### Analytics - Leaderboard (public)
+GET http://localhost:4000/api/analytics/leaderboard?limit=10
+
+# Example 200 response
+# {
+#   "leaderboard": [
+#     { "username": "alice", "email": "alice@example.com", "problemsSolved": 23, "totalSubmissions": 87 },
+#     { "username": "bob", "email": "bob@example.com", "problemsSolved": 19, "totalSubmissions": 62 }
+#   ]
+# }
+
+### Analytics - Problem stats (public)
+GET http://localhost:4000/api/analytics/problem/1
+
+# Example 200 response
+# {
+#   "problem": { "pid": 1, "title": "Two Sum", "difficulty": "easy", "tags": ["array", "hashmap"] },
+#   "stats": {
+#     "totalSubmissions": 450,
+#     "uniqueUsers": 123,
+#     "acceptanceRate": "72.45%"
+#   },
+#   "successDistribution": { "passed": 326, "failed": 124 },
+#   "languageStats": [
+#     { "language": "javascript", "submissions": 180, "passed": 135 },
+#     { "language": "python", "submissions": 150, "passed": 110 }
+#   ]
+# }
+
+### Analytics - My stats (requires auth)
+GET http://localhost:4000/api/analytics/me
+
+# Example 200 response
+# {
+#   "overview": {
+#     "totalSubmissions": 45,
+#     "problemsSolved": 12,
+#     "successRate": "68.89%"
+#   },
+#   "languageStats": [
+#     { "language": "javascript", "total": 25, "passed": 18, "successRate": "72.00%" },
+#     { "language": "python", "total": 20, "passed": 13, "successRate": "65.00%" }
+#   ],
+#   "recentSubmissions": [
+#     { "pid": 5, "language": "javascript", "passed": true, "createdAt": "2025-10-18T10:30:00Z" }
+#   ]
 # }

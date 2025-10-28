@@ -79,6 +79,6 @@ export type MySubmissionsResult = {
 };
 
 export async function getMySubmissions(): Promise<MySubmissionsResult> {
-  const { data } = await api.get("/api/execute/my");
+  const { data } = await api.get("/api/submissions/my");
   return data as MySubmissionsResult;
 }

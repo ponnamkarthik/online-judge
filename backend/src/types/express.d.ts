@@ -1,7 +1,10 @@
 import 'express-serve-static-core';
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: { id: string };
+declare namespace Express {
+  export interface Request {
+    user?: {
+      id: string;
+      role: string;
+    };
   }
 }

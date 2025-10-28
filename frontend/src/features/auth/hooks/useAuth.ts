@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   login as loginApi,
-  me as meApi,
+  getCurrentUser as getCurrentUserApi,
   logout as logoutApi,
   register as registerApi,
 } from "@/features/auth/api";
@@ -10,7 +10,7 @@ import type { LoginPayload, RegisterPayload } from "@/features/auth/types";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
 export const AUTH_KEYS = {
-  me: ["auth", "me"] as const,
+  currentUser: ["auth", "current-user"] as const,
 };
 
 export function useAuth() {
@@ -18,8 +18,8 @@ export function useAuth() {
   const setUser = useAuthStore((s) => s.setUser);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: AUTH_KEYS.me,
-    queryFn: meApi,
+    queryKey: AUTH_KEYS.currentUser,
+    queryFn: getCurrentUserApi,
     retry: 0,
     // If we have cached user, don't block UI: return immediately and refresh in background
     staleTime: 60_000,
@@ -51,7 +51,7 @@ export function useLogin() {
     mutationFn: (payload: LoginPayload) => loginApi(payload),
     onSuccess: (user) => {
       setUser(user);
-      qc.invalidateQueries({ queryKey: AUTH_KEYS.me });
+      qc.invalidateQueries({ queryKey: AUTH_KEYS.currentUser });
     },
   });
 }
@@ -63,7 +63,7 @@ export function useRegister() {
     mutationFn: (payload: RegisterPayload) => registerApi(payload),
     onSuccess: (user) => {
       setUser(user);
-      qc.invalidateQueries({ queryKey: AUTH_KEYS.me });
+      qc.invalidateQueries({ queryKey: AUTH_KEYS.currentUser });
     },
   });
 }

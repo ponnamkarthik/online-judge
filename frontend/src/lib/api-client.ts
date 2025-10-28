@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type { InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "./constants";
+import { logger } from "./logger";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,6 +32,13 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const url = original?.url || "";
     const isRefresh = url.includes("/api/auth/refresh");
+
+    // Handle 403 Forbidden (insufficient permissions)
+    if (status === 403) {
+      logger.error("Permission denied:", error.response?.data);
+      // Let the component handle the error display
+      return Promise.reject(error);
+    }
 
     if (status === 401 && original && !original._retry && !isRefresh) {
       if (refreshFailed) {

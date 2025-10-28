@@ -267,8 +267,8 @@ Content-Type: application/json
 #   "error": { "type": "UnauthorizedError", "message": "Unauthorized" }
 # }
 
-### Execute - Get my last code (requires auth)
-GET http://localhost:4000/api/execute/my/last?pid=1&language=javascript
+### Submissions - Get my last code (requires auth)
+GET http://localhost:4000/api/submissions/my/last?pid=1&language=javascript
 
 # Example 200 response
 # {
@@ -277,8 +277,8 @@ GET http://localhost:4000/api/execute/my/last?pid=1&language=javascript
 #   "pid": 1
 # }
 
-### Execute - My submissions (requires auth)
-GET http://localhost:4000/api/execute/my
+### Submissions - My submissions (requires auth)
+GET http://localhost:4000/api/submissions/my?limit=50&includeCode=false
 
 # Example 200 response
 # {
@@ -300,7 +300,93 @@ GET http://localhost:4000/api/execute/my
 #   ]
 # }
 
-### Testcases - Bulk create (requires auth)
+### Testcases - Get all for problem (requires manage_testcases permission)
+GET http://localhost:4000/api/testcases/problem/1
+
+# Example 200 response
+# {
+#   "pid": 1,
+#   "total": 5,
+#   "testcases": [
+#     {
+#       "id": "67159b...",
+#       "input": "2 3\n",
+#       "expectedOutput": "5",
+#       "isSample": true,
+#       "timeLimitMs": 2000,
+#       "createdAt": "2025-10-11T08:00:00.123Z",
+#       "updatedAt": "2025-10-11T08:00:00.123Z"
+#     },
+#     {
+#       "id": "67159c...",
+#       "input": "10 -4\n",
+#       "expectedOutput": "6",
+#       "isSample": false,
+#       "timeLimitMs": 2000,
+#       "createdAt": "2025-10-11T08:01:00.123Z",
+#       "updatedAt": "2025-10-11T08:01:00.123Z"
+#     }
+#   ]
+# }
+
+### Testcases - Create single test case (requires manage_testcases permission)
+POST http://localhost:4000/api/testcases/problem/1
+Content-Type: application/json
+
+{
+  "input": "100 200\n",
+  "expectedOutput": "300",
+  "isSample": true,
+  "timeLimitMs": 3000
+}
+
+# Example 201 response
+# {
+#   "testcase": {
+#     "id": "67159d...",
+#     "input": "100 200\n",
+#     "expectedOutput": "300",
+#     "isSample": true,
+#     "timeLimitMs": 3000,
+#     "createdAt": "2025-10-11T08:05:00.123Z",
+#     "updatedAt": "2025-10-11T08:05:00.123Z"
+#   }
+# }
+
+### Testcases - Update test case (requires manage_testcases permission)
+PATCH http://localhost:4000/api/testcases/67159d1234567890abcdef12
+Content-Type: application/json
+
+{
+  "input": "100 250\n",
+  "expectedOutput": "350",
+  "isSample": false,
+  "timeLimitMs": 2500
+}
+
+# Example 200 response
+# {
+#   "testcase": {
+#     "id": "67159d...",
+#     "input": "100 250\n",
+#     "expectedOutput": "350",
+#     "isSample": false,
+#     "timeLimitMs": 2500,
+#     "createdAt": "2025-10-11T08:05:00.123Z",
+#     "updatedAt": "2025-10-11T08:10:00.456Z"
+#   }
+# }
+
+### Testcases - Delete test case (requires manage_testcases permission)
+DELETE http://localhost:4000/api/testcases/67159d1234567890abcdef12
+
+# Example 200 response
+# {
+#   "message": "Test case deleted successfully",
+#   "id": "67159d1234567890abcdef12"
+# }
+
+### Testcases - Bulk create (requires manage_testcases permission)
 POST http://localhost:4000/api/testcases/bulk
 Content-Type: application/json
 
@@ -335,4 +421,79 @@ Content-Type: application/json
 # Example 200 response
 # {
 #   "advice": "- Summary: ...\n- Correctness: ...\n- Complexity: ...\n- Improvements: ..."
+# }
+
+### Analytics - Global stats (public)
+GET http://localhost:4000/api/analytics/global
+
+# Example 200 response
+# {
+#   "overview": {
+#     "totalUsers": 150,
+#     "totalProblems": 25,
+#     "totalSubmissions": 3420,
+#     "globalSuccessRate": "67.45%"
+#   },
+#   "problemsByDifficulty": [
+#     { "difficulty": "easy", "count": 10 },
+#     { "difficulty": "medium", "count": 12 },
+#     { "difficulty": "hard", "count": 3 }
+#   ],
+#   "languageDistribution": [
+#     { "language": "javascript", "count": 1250 },
+#     { "language": "python", "count": 980 },
+#     { "language": "cpp", "count": 750 }
+#   ],
+#   "recentActivity": [
+#     { "date": "2025-10-17", "submissions": 145, "passed": 98 },
+#     { "date": "2025-10-18", "submissions": 162, "passed": 110 }
+#   ]
+# }
+
+### Analytics - Leaderboard (public)
+GET http://localhost:4000/api/analytics/leaderboard?limit=10
+
+# Example 200 response
+# {
+#   "leaderboard": [
+#     { "username": "alice", "email": "alice@example.com", "problemsSolved": 23, "totalSubmissions": 87 },
+#     { "username": "bob", "email": "bob@example.com", "problemsSolved": 19, "totalSubmissions": 62 }
+#   ]
+# }
+
+### Analytics - Problem stats (public)
+GET http://localhost:4000/api/analytics/problem/1
+
+# Example 200 response
+# {
+#   "problem": { "pid": 1, "title": "Two Sum", "difficulty": "easy", "tags": ["array", "hashmap"] },
+#   "stats": {
+#     "totalSubmissions": 450,
+#     "uniqueUsers": 123,
+#     "acceptanceRate": "72.45%"
+#   },
+#   "successDistribution": { "passed": 326, "failed": 124 },
+#   "languageStats": [
+#     { "language": "javascript", "submissions": 180, "passed": 135 },
+#     { "language": "python", "submissions": 150, "passed": 110 }
+#   ]
+# }
+
+### Analytics - My stats (requires auth)
+GET http://localhost:4000/api/analytics/me
+
+# Example 200 response
+# {
+#   "overview": {
+#     "totalSubmissions": 45,
+#     "problemsSolved": 12,
+#     "successRate": "68.89%"
+#   },
+#   "languageStats": [
+#     { "language": "javascript", "total": 25, "passed": 18, "successRate": "72.00%" },
+#     { "language": "python", "total": 20, "passed": 13, "successRate": "65.00%" }
+#   ],
+#   "recentSubmissions": [
+#     { "pid": 5, "language": "javascript", "passed": true, "createdAt": "2025-10-18T10:30:00Z" }
+#   ]
 # }

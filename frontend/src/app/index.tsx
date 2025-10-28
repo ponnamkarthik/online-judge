@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AUTH_KEYS } from "@/features/auth/hooks/useAuth";
-import { me as meApi } from "@/features/auth/api";
+import { getCurrentUser as getCurrentUserApi } from "@/features/auth/api";
 import type { User } from "@/features/auth/types";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 
@@ -19,8 +19,8 @@ function AuthBootstrap({ children }: { children: React.ReactNode }) {
     if (triedRef.current) return;
     triedRef.current = true;
     qc.fetchQuery<User>({
-      queryKey: AUTH_KEYS.me,
-      queryFn: meApi,
+      queryKey: AUTH_KEYS.currentUser,
+      queryFn: getCurrentUserApi,
       retry: 0,
     }).finally(() => setBootDone(true));
   }, [qc]);

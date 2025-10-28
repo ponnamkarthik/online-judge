@@ -18,7 +18,7 @@ export async function login(payload: LoginPayload) {
   return data.user;
 }
 
-export async function me() {
+export async function getCurrentUser() {
   const { data } = await api.get<{ user: User }>("/api/auth/me");
   return data.user;
 }

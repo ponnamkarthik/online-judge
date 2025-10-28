@@ -21,14 +21,16 @@ export function useExecuteSubmit() {
   return useMutation<ExecuteSubmitResult, unknown, ExecuteSubmitPayload>({
     mutationFn: executeSubmit,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["execute", "my"] });
+      qc.invalidateQueries({ queryKey: ["execute", "my-submissions"] });
     },
   });
 }
 
-export function useMySubmissions() {
+export function useMySubmissions(enabled = true) {
   return useQuery<MySubmissionsResult>({
-    queryKey: ["execute", "my"],
+    queryKey: ["execute", "my-submissions"],
     queryFn: getMySubmissions,
+    enabled,
+    staleTime: 60_000,
   });
 }

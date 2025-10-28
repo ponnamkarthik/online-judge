@@ -11,8 +11,10 @@ import { errorMiddleware, notFoundMiddleware } from './middleware/error';
 import authRouter from './routes/auth.routes';
 import problemRouter from './routes/problem.routes';
 import executeRouter from './routes/execute.routes';
+import submissionsRouter from './routes/submission.routes';
 import aiRouter from './routes/ai.routes';
 import testcaseRouter from './routes/testcase.routes';
+import analyticsRouter from './routes/analytics.routes';
 
 const app = express();
 
@@ -54,8 +56,10 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/problems', problemRouter);
 app.use('/api/execute', executeRouter);
+app.use('/api/submissions', submissionsRouter);
 app.use('/api/testcases', testcaseRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/analytics', analyticsRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

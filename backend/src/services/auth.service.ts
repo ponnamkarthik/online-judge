@@ -8,7 +8,12 @@ export async function registerUser(input: { email: string; username: string; pas
   const existing = await User.findOne({ email: input.email });
   if (existing) throw new ConflictError('Email already in use');
   const passwordHash = await hashPassword(input.password);
-  const user = await User.create({ email: input.email, username: input.username, passwordHash });
+  const user = await User.create({
+    email: input.email,
+    username: input.username,
+    passwordHash,
+    role: 'user', // Default role
+  });
   return sanitizeUser(user);
 }
 
@@ -28,8 +33,8 @@ export async function loginUser(input: {
     userAgent: input.userAgent,
     ip: input.ip,
   });
-  const accessToken = signAccessToken(String(user._id));
-  const refreshToken = signRefreshToken(String(user._id), String(session._id));
+  const accessToken = signAccessToken(String(user._id), user.role);
+  const refreshToken = signRefreshToken(String(user._id), user.role, String(session._id));
   return { user: sanitizeUser(user), accessToken, refreshToken };
 }
 
@@ -43,6 +48,10 @@ export async function refreshTokens(token: string, meta?: { userAgent?: string; 
   const session = await Session.findById(decoded.sid);
   if (!session || session.revokedAt) throw new UnauthorizedError('Refresh session revoked');
 
+  // Fetch user to get current role
+  const user = await User.findById(session.user);
+  if (!user) throw new UnauthorizedError('User not found');
+
   // rotate session id
   session.revokedAt = new Date();
   await session.save();
@@ -52,8 +61,8 @@ export async function refreshTokens(token: string, meta?: { userAgent?: string; 
     ip: meta?.ip,
   });
 
-  const accessToken = signAccessToken(String(session.user));
-  const refreshToken = signRefreshToken(String(session.user), String(newSession._id));
+  const accessToken = signAccessToken(String(session.user), user.role);
+  const refreshToken = signRefreshToken(String(session.user), user.role, String(newSession._id));
   return { accessToken, refreshToken };
 }
 
@@ -77,6 +86,7 @@ function sanitizeUser(user: any) {
     id: String(user._id),
     email: user.email,
     username: user.username,
+    role: user.role, // Include role in response
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

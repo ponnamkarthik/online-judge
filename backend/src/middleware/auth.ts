@@ -13,7 +13,10 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
 
   try {
     const payload = verifyAccessToken(token);
-    (req as unknown as { user?: { id: string } }).user = { id: String(payload.sub) };
+    (req as unknown as { user?: { id: string; role: string } }).user = {
+      id: String(payload.sub),
+      role: payload.role,
+    };
     return next();
   } catch {
     return next(new UnauthorizedError('Invalid or expired token'));
@@ -31,7 +34,10 @@ export function maybeAuth(req: Request, _res: Response, next: NextFunction) {
     if (!token) return next();
 
     const payload = verifyAccessToken(token);
-    (req as unknown as { user?: { id: string } }).user = { id: String(payload.sub) };
+    (req as unknown as { user?: { id: string; role: string } }).user = {
+      id: String(payload.sub),
+      role: payload.role,
+    };
     return next();
   } catch {
     return next();

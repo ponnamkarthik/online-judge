@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { RoleBadge } from "@/components/ui/role-badge";
 import { useTheme } from "@/hooks/useTheme";
-import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useAuth, useLogout } from "@/features/auth/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 
 export function AppHeader() {
   const { toggle } = useTheme();
+  const { user } = useAuth();
   const { mutateAsync: doLogout, isPending } = useLogout();
   const navigate = useNavigate();
   return (
@@ -22,7 +24,8 @@ export function AppHeader() {
           </Link>
         </nav>
       </div>
-      <div className="flex gap-3">
+      <div className="flex items-center gap-3">
+        {user?.role && <RoleBadge role={user.role} />}
         <Button variant="secondary" onClick={toggle}>
           Toggle theme
         </Button>

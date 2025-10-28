@@ -11,6 +11,7 @@ const schema = z.object({
   REFRESH_TOKEN_TTL: z.string().default('7d'),
   COOKIE_DOMAIN: z.string().optional(),
   CORS_ORIGIN: z.string().optional(),
+  COMPILER_URL: z.string().url().optional(),
   GEMINI_API_KEY: z.string().optional(),
 });
 

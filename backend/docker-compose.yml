@@ -15,7 +15,25 @@ services:
       REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-7d}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN}
       CORS_ORIGIN: ${CORS_ORIGIN}
+      COMPILER_URL: http://compiler:5001
     volumes:
       - .:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+    depends_on:
+      - compiler
+
+  compiler:
+    build:
+      context: ../compiler
+    container_name: codearena-compiler
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: development
+      PORT: 5001
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    volumes:
+      - ../compiler:/app
       - /app/node_modules
     command: ["npm", "run", "dev"]

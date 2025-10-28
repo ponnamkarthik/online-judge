@@ -20,6 +20,7 @@ import {
   useMySubmissions,
 } from "@/features/execute/hooks/useExecute";
 import { useAiReview } from "@/features/ai/hooks/useAiReview";
+import { logger } from "@/lib/logger";
 
 const LANGUAGE_OPTIONS = [
   { value: "cpp", label: "C++" },
@@ -127,7 +128,7 @@ export function ProblemDetailPage() {
   const { mutateAsync: runTest, isPending: isTesting } = useExecuteTest();
   const { mutateAsync: runSubmit, isPending: isSubmitting } =
     useExecuteSubmit();
-  const { data: mySubs } = useMySubmissions();
+  const { data: mySubs } = useMySubmissions(activeTab === "history");
   const { mutateAsync: reviewCode, isPending: isReviewing } = useAiReview();
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);
   const initializedFromSources = useRef(false);
@@ -145,11 +146,11 @@ export function ProblemDetailPage() {
     const fromLocal = localStorage.getItem(lsKey);
     const codesByLanguage = (data?.problem as ProblemWithCodes | undefined)
       ?.codesByLanguage;
-    console.log("codesByLanguage:", codesByLanguage, apiKey);
+    logger.debug("codesByLanguage:", codesByLanguage, apiKey);
     const fromServer = codesByLanguage?.[apiKey];
-    console.log("fromLocal:", fromLocal);
-    console.log("fromServer:", fromServer);
-    console.log("DEFAULT:", DEFAULT_SNIPPETS[next]);
+    logger.debug("fromLocal:", fromLocal);
+    logger.debug("fromServer:", fromServer);
+    logger.debug("DEFAULT:", DEFAULT_SNIPPETS[next]);
     setCode(fromLocal ?? fromServer ?? DEFAULT_SNIPPETS[next]);
     // Persist selected language for this problem
     try {
@@ -349,6 +350,8 @@ export function ProblemDetailPage() {
                         className="px-3 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50"
                         disabled={isTesting}
                         onClick={async () => {
+                          // Clear previous results before running a new test
+                          setResults({ test: null, submit: null });
                           setActiveTab("test");
                           const mapped = lang;
                           try {
@@ -385,6 +388,8 @@ export function ProblemDetailPage() {
                         className="px-3 py-1 rounded bg-foreground text-background disabled:opacity-50"
                         disabled={isSubmitting}
                         onClick={async () => {
+                          // Clear previous results before submitting
+                          setResults({ test: null, submit: null });
                           setActiveTab("submit");
                           const mapped = lang;
                           try {

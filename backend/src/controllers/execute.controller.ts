@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
+
 import { executeCode, type SupportedLanguage } from '../services/execute.service';
 import { Problem } from '../models/problem.model';
 import { TestCase } from '../models/testcase.model';
@@ -121,21 +122,4 @@ export async function executeSubmitHandler(
 }
 
 // schema and handler to fetch the latest code submitted by the current user for a given pid
-export const getMyLastCodeSchema = z.object({
-  pid: z.coerce.number().int().positive(),
-  language: z.enum(['javascript', 'typescript', 'python', 'cpp', 'java']).optional(),
-});
-
-export async function getMyLastCodeHandler(req: Request, res: Response) {
-  const { pid, language } = req.query;
-  const userId = (req as any).user?.id;
-  const q = getMyLastCodeSchema.parse({ pid: pid as any, language: language as any });
-  const filter: any = { user: userId, pid: q.pid };
-  if (q.language) filter.language = q.language;
-  const last = await Submission.findOne(filter).sort({ createdAt: -1 }).select('code language pid');
-  return res.json({
-    code: last?.code ?? '',
-    language: last?.language ?? q.language ?? null,
-    pid: q.pid,
-  });
-}
+// Note: last code and listing moved to submissions module
