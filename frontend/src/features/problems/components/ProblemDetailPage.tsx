@@ -106,6 +106,7 @@ export function ProblemDetailPage() {
       stderr: string;
       exitCode: number;
       durationMs: number;
+      timedOut: boolean;
     } | null;
     submit?: {
       total: number;
@@ -367,6 +368,7 @@ export function ProblemDetailPage() {
                                 stderr: res.result.stderr,
                                 exitCode: res.result.exitCode,
                                 durationMs: res.result.durationMs,
+                                timedOut: res.result.timedOut,
                               },
                             }));
                           } catch {
@@ -377,6 +379,7 @@ export function ProblemDetailPage() {
                                 stderr: "Execution failed",
                                 exitCode: -1,
                                 durationMs: 0,
+                                timedOut: false,
                               },
                             }));
                           }
@@ -541,6 +544,11 @@ export function ProblemDetailPage() {
                             Exit: {results.test.exitCode} •{" "}
                             {results.test.durationMs}ms
                           </div>
+                          {results.test.timedOut && (
+                            <div className="text-sm text-red-500">
+                              Execution timed out.
+                            </div>
+                          )}
                           {results.test.stdout && (
                             <div>
                               <div className="text-sm font-medium mb-1">
